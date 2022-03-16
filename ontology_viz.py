@@ -56,6 +56,8 @@ class OntologyGraph:
         for s, p, o in self.g:
             if any(uri in self.config.blacklist for uri in (s, p, o)):
                 continue
+
+            print(f"TUPLE {s} {p} {o}")
             if p == RDF.type:
                 if o == OWL.Class:
                     self.add_to_classes(s)
@@ -180,11 +182,15 @@ class OntologyGraph:
         return self.pred_map.get(uri, self.compute_label(uri, 0))
 
     def compute_label(self, uri, length=20):
-        if uri in self.labels:
-            label = self.labels[uri]
-        else:
-            prefix, _, name = self.g.compute_qname(uri)
-            label = '{}:{}'.format(prefix, name) if prefix else name
+        try:
+            if uri in self.labels:
+                label = self.labels[uri]
+            else:
+                prefix, _, name = self.g.compute_qname(uri)
+                label = '{}:{}'.format(prefix, name) if prefix else name
+        except:
+            label = uri
+
         if length and len(label) > length:
             label = label[:length-3] + '...'
         return label
